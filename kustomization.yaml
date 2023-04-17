@@ -3,6 +3,9 @@ kind: Kustomization
 commonLabels:
   app: java
 resources:
-  - configMap.yaml
-  - deployment.yaml
-  - service.yaml
+- configMap.yaml
+- deployment.yaml
+- service.yaml
+images:
+- name: aurorxa/argocd-springboot
+  newTag: d9a60067ab5b3020acaadaad164284aafbf0d314
