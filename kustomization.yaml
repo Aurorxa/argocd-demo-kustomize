@@ -6,3 +6,4 @@ resources:
   - configMap.yaml
   - deployment.yaml
   - service.yaml
+  - sealed-secret.yaml
