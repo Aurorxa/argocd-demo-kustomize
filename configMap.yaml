@@ -1,0 +1,6 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: java-configmap
+data:
+  application.properties: "server.port=8080"

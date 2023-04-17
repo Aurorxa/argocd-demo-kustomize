@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+spec:
+  selector:
+    matchLabels:
+      app: deployment
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: deployment
+    spec:
+      containers:
+        - name: deployment
+          image: aurorxa/argocd-springboot:latest # 镜像的地址
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 1G
+          livenessProbe: # 存活探针
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+            initialDelaySeconds: 60 # 延迟加载时间
+            timeoutSeconds: 10  # 超时时间设置
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10 # 重试时间间隔
+          readinessProbe: # 就绪探针，检测容器是否准备好，如果准备好就接收流量
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 90 # 延迟加载时间
+            timeoutSeconds: 10  # 超时时间
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10 # 重试时间间隔
+          ports:
+            - containerPort: 8080
+              name: deployment
+          volumeMounts:
+            - name: localtime
+              mountPath: /etc/localtime
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Taipei
+      restartPolicy: Always
