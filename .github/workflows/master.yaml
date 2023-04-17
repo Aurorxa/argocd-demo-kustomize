@@ -1,0 +1,41 @@
+name: CD # action 的名称
+
+on: # 什么时候触发 action
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      image:
+        required: true
+        description: 'Docker 的镜像地址'
+      sha-tag:
+        required: true
+        description: 'Docker 的镜像tag'
+
+jobs:
+  builds:
+    runs-on: ubuntu-latest
+    steps: # 步骤
+      - name: "拉取仓库代码"
+        if: ${{ github.event.inputs.image }}
+        uses: actions/checkout@v3
+      - name: "判断一下 kustomize 是否存在"
+        run: kustomize version
+      - name: "执行 kustomize 命令用来替换 deployment 中的 spec.containers.image 的值"
+        if: ${{ github.event.inputs.image }}
+        run: |
+          pwd && ls -lah
+          kustomize edit set image ${{ github.event.inputs.image }}:${{ github.event.inputs.sha-tag }}
+      - name: 'git commit 和 git push'
+        uses: actions-x/commit@v6
+        if: ${{ github.event.inputs.image }}
+        with:
+          #          token: ${{ secrets.CI_TOKEN }}
+          #          push-branch: 'master'
+          #          force: true
+          message: "kustomize set image to ${{ github.event.inputs.image }}:${{ github.event.inputs.sha-tag }}"
+#          name: 许大仙
+#          email: xudaxian@qq.com
+
